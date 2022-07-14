@@ -176,7 +176,7 @@ class BasicAuthAdapter extends InitPHP\Auth\AbstractAdapter
 
 ```php
 $segment = new \InitPHP\Auth\Segment('', \App\BasicAuthAdapter::class, [
-    'dsn'       => 'mysqli:host=localhost;dbname=test_database;charset=utf8mb4',
+    'dsn'       => 'mysql:host=localhost;dbname=test_database;charset=utf8mb4',
     'username'  => 'root',
     'password'  => ''
 ]);
