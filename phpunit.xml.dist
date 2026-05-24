@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         cacheResultFile=".phpunit.cache/test-results"
+         executionOrder="depends,defects">
+    <php>
+        <!-- PHPUnit's CLI runner does not seed session.save_path; without
+             it, session_start() would silently bail inside the SessionAdapter
+             tests. output_buffering keeps the dot-progress writer from
+             flushing headers before session_start() can be reissued in a
+             subsequent test. -->
+        <ini name="session.save_handler" value="files"/>
+        <ini name="session.save_path" value="/tmp"/>
+        <ini name="output_buffering" value="4096"/>
+    </php>
+    <testsuites>
+        <testsuite name="Auth Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <coverage cacheDirectory=".phpunit.cache/code-coverage"
+              processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </coverage>
+</phpunit>
