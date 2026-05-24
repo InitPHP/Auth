@@ -1,53 +1,30 @@
 <?php
-/**
- * AbstractAdapter.php
- *
- * This file is part of Auth.
- *
- * @author     Muhammet ŞAFAK <info@muhammetsafak.com.tr>
- * @copyright  Copyright © 2022 Muhammet ŞAFAK
- * @license    ./LICENSE  MIT
- * @version    1.0
- * @link       https://www.muhammetsafak.com.tr
- */
 
 declare(strict_types=1);
 
 namespace InitPHP\Auth;
 
+/**
+ * Common base for {@see AdapterInterface} implementations.
+ *
+ * Provides a default {@see self::collective()} that routes through
+ * {@see self::set()}. Adapters that can commit atomically (CookieAdapter
+ * would otherwise emit one Set-Cookie header per key) should override
+ * it for efficiency.
+ */
 abstract class AbstractAdapter implements AdapterInterface
 {
-
-    abstract public function __construct(string $name, array $options = []);
-
     /**
-     * @inheritDoc
+     * @param array<string, mixed> $data
+     *
+     * @return static
      */
-    abstract public function get(string $key, $default = null);
+    public function collective(array $data): AdapterInterface
+    {
+        foreach ($data as $key => $value) {
+            $this->set((string) $key, $value);
+        }
 
-    /**
-     * @inheritDoc
-     */
-    abstract public function set(string $key, $value): AdapterInterface;
-
-    /**
-     * @inheritDoc
-     */
-    abstract public function collective(array $data): AdapterInterface;
-
-    /**
-     * @inheritDoc
-     */
-    abstract public function has(string $key): bool;
-
-    /**
-     * @inheritDoc
-     */
-    abstract public function remove(string ...$key): AdapterInterface;
-
-    /**
-     * @inheritDoc
-     */
-    abstract public function destroy(): bool;
-
+        return $this;
+    }
 }

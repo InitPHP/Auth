@@ -3,3 +3,6 @@
 /.vscode/
 /vendor/
 /composer.lock
+/build/
+/.phpunit.cache/
+/.php-cs-fixer.cache

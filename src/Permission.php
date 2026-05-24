@@ -1,70 +1,142 @@
 <?php
-/**
- * Permission.php
- *
- * This file is part of Auth.
- *
- * @author     Muhammet ŞAFAK <info@muhammetsafak.com.tr>
- * @copyright  Copyright © 2022 Muhammet ŞAFAK
- * @license    ./LICENSE  MIT
- * @version    1.0
- * @link       https://www.muhammetsafak.com.tr
- */
 
 declare(strict_types=1);
 
 namespace InitPHP\Auth;
 
+use BadMethodCallException;
+
+/**
+ * Small case-insensitive permission set.
+ *
+ * Permissions are normalized to lower-case on the way in and compared
+ * case-insensitively, so `new Permission(['Editor'])->is('editor')`
+ * matches. The internal list is always a 0-indexed
+ * {@link https://phpstan.org/writing-php-code/phpdoc-types#list `list<string>`}
+ * — `remove()` reindexes after `unset()` to keep that invariant.
+ *
+ * Magic `is_*` accessors (`$perm->is_admin`, `isset($perm->is_admin)`,
+ * `unset($perm->is_admin)`) are wired through {@see self::__call()},
+ * {@see self::__isset()} and {@see self::__unset()} for convenience in
+ * templates; the explicit {@see self::is()}, {@see self::push()} and
+ * {@see self::remove()} methods are preferred in code that has access
+ * to an IDE or a static analyser.
+ */
 class Permission
 {
+    /** @var list<string> */
+    protected array $permissions = [];
 
-    protected array $_perms = [];
-
-    public function __construct(array $perms = [])
+    /**
+     * @param array<int, string> $permissions Values that are not strings
+     *                                        are silently skipped.
+     *                                        Duplicates after normalization
+     *                                        are dropped.
+     */
+    public function __construct(array $permissions = [])
     {
-        $this->_perms = $perms;
-    }
-
-    public function __call($name, $arguments)
-    {
-        if (\substr($name, 0, 3) == 'is_') {
-            $perm = \substr($name, 3);
-            return !empty($perm) && $this->is($perm);
+        foreach ($permissions as $perm) {
+            if (!\is_string($perm)) {
+                continue;
+            }
+            $normalized = $this->normalize($perm);
+            if (\in_array($normalized, $this->permissions, true)) {
+                continue;
+            }
+            $this->permissions[] = $normalized;
         }
-        throw new \RuntimeException('The ' . $name . ' method is not available in the ' . __CLASS__ .  ' class.');
     }
 
-    public function __isset($name)
+    /**
+     * Magic dispatch for `is_*` accessors. `$perm->is_admin()` becomes
+     * `$perm->is('admin')`. Any other method name raises
+     * {@see BadMethodCallException}.
+     *
+     * @param array<int, mixed> $arguments Ignored — the accessor takes no
+     *                                     parameters.
+     *
+     * @throws BadMethodCallException When $name does not start with `is_`.
+     */
+    public function __call(string $name, array $arguments): bool
     {
-        if(\substr($name, 0, 3) == 'is_'){
+        if (\strncmp($name, 'is_', 3) === 0) {
+            $permission = \substr($name, 3);
+
+            return $permission !== '' && $this->is($permission);
+        }
+
+        throw new BadMethodCallException(\sprintf(
+            'Method %s::%s() does not exist.',
+            static::class,
+            $name
+        ));
+    }
+
+    /**
+     * Magic dispatch for `isset($perm->some_role)` and
+     * `isset($perm->is_some_role)`.
+     */
+    public function __isset(string $name): bool
+    {
+        if (\strncmp($name, 'is_', 3) === 0) {
             $name = \substr($name, 3);
         }
-        return $this->is($name);
+
+        return $name !== '' && $this->is($name);
     }
 
-    public function __unset($name)
+    /**
+     * Magic dispatch for `unset($perm->some_role)` /
+     * `unset($perm->is_some_role)`.
+     */
+    public function __unset(string $name): void
     {
-        if(\substr($name, 0, 3) == 'is_'){
+        if (\strncmp($name, 'is_', 3) === 0) {
             $name = \substr($name, 3);
         }
-        $this->remove($name);
-        return null;
+        if ($name !== '') {
+            $this->remove($name);
+        }
     }
 
-    public function __sleep()
+    /**
+     * Only the permission list is serialized; anything else is implementation
+     * detail that should not be persisted across requests.
+     *
+     * @return array<int, string>
+     */
+    public function __sleep(): array
     {
-        return ['_perms'];
+        return ['permissions'];
     }
 
+    /**
+     * @return list<string>
+     */
+    public function getPermissions(): array
+    {
+        return $this->permissions;
+    }
+
+    /**
+     * @deprecated since 2.0 — use {@see self::getPermissions()}. Kept
+     *             as a v1 BC shim and removed in v3.
+     *
+     * @return list<string>
+     */
     public function getPermission(): array
     {
-        return $this->_perms;
+        return $this->permissions;
     }
 
+    /**
+     * True when any of the supplied names is present in the set.
+     * Comparison is case-insensitive.
+     */
     public function is(string ...$permission_name): bool
     {
         foreach ($permission_name as $name) {
-            if(\in_array(\strtolower($name), $this->_perms, true)){
+            if (\in_array($this->normalize($name), $this->permissions, true)) {
                 return true;
             }
         }
@@ -72,33 +144,50 @@ class Permission
         return false;
     }
 
+    /**
+     * Add one or more permissions. Returns the count of names that were
+     * actually inserted (names already present are skipped).
+     */
     public function push(string ...$permissions): int
     {
-        $res = 0;
+        $added = 0;
         foreach ($permissions as $perm) {
-            $lowercase = \strtolower($perm);
-            if(\in_array($lowercase, $this->_perms, true)){
+            $normalized = $this->normalize($perm);
+            if (\in_array($normalized, $this->permissions, true)) {
                 continue;
             }
-            ++$res;
-            $this->_perms[] = $lowercase;
+            $this->permissions[] = $normalized;
+            ++$added;
         }
 
-        return $res;
+        return $added;
     }
 
+    /**
+     * Remove one or more permissions. Returns the count of names that
+     * were actually removed. The internal list is reindexed so the
+     * `list<string>` invariant holds.
+     */
     public function remove(string ...$permissions): int
     {
-        $res = 0;
+        $removed = 0;
         foreach ($permissions as $perm) {
-            if (($search = \array_search(\strtolower($perm), $this->_perms, true)) === FALSE) {
+            $search = \array_search($this->normalize($perm), $this->permissions, true);
+            if ($search === false) {
                 continue;
             }
-            ++$res;
-            unset($this->_perms[$search]);
+            unset($this->permissions[$search]);
+            ++$removed;
+        }
+        if ($removed > 0) {
+            $this->permissions = \array_values($this->permissions);
         }
 
-        return $res;
+        return $removed;
     }
 
+    private function normalize(string $name): string
+    {
+        return \strtolower(\trim($name));
+    }
 }
