@@ -4,7 +4,7 @@ A small PHP authentication & authorization library with pluggable storage
 adapters (session, signed cookie, or custom) and a tiny case-insensitive
 permission set.
 
-[![Designed & Maintained with Tan](https://www.muhammetsafak.com.tr/badges/designed-maintained-with-tan.svg)](https://www.muhammetsafak.com.tr/en/tan/)
+[![Designed & Maintained with Tan](https://muhammetsafak.com/badges/designed-maintained-with-tan.svg)](https://muhammetsafak.com/tan/)
 [![Latest Stable Version](https://poser.pugx.org/initphp/auth/v)](https://packagist.org/packages/initphp/auth)
 [![Total Downloads](https://poser.pugx.org/initphp/auth/downloads)](https://packagist.org/packages/initphp/auth)
 [![CI](https://github.com/InitPHP/Auth/actions/workflows/ci.yml/badge.svg)](https://github.com/InitPHP/Auth/actions/workflows/ci.yml)
@@ -205,7 +205,7 @@ adapter interface that no longer enforces a constructor signature. See
 
 ## Credits
 
-- [Muhammet ŞAFAK](https://www.muhammetsafak.com.tr) <<info@muhammetsafak.com.tr>>
+- [Muhammet ŞAFAK](https://muhammetsafak.com) <<info@muhammetsafak.com>>
 
 ## License
 
