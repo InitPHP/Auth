@@ -14,12 +14,12 @@ works the same or only affects edge cases.
 
 | | v1 | v2 |
 | --- | --- | --- |
-| PHP | `>=7.4` | `^8.2` (`^8.0` in 2.0.0; tested on 8.2 – 8.5) |
+| PHP | `>=7.4` | `^8.0` in 2.x; `^8.2` from 3.0.0 (tested on 8.2 – 8.5) |
 | `initphp/parameterbag` | `^1.0` | `^2.0` |
 | `ext-json`, `ext-hash` | not strictly required | required (bundled with default PHP builds) |
 
 ```bash
-composer require initphp/auth:^2.0
+composer require initphp/auth:^3.0
 composer require initphp/parameterbag:^2.0    # if you depend on it directly
 ```
 
@@ -285,7 +285,7 @@ The test suite covers `Permission`, `SessionAdapter`, `CookieAdapter`,
 ## Migration checklist
 
 - [ ] Bump `php` to `^8.2` in your project's `composer.json`.
-- [ ] Bump `initphp/auth` to `^2.0`.
+- [ ] Bump `initphp/auth` to `^3.0` (`^2.0` if you must stay on PHP 8.0 or 8.1).
 - [ ] Bump `initphp/parameterbag` to `^2.0` if you depend on it directly.
 - [ ] Generate a fresh cookie salt (`bin2hex(random_bytes(32))`) and
       store it in your environment.
