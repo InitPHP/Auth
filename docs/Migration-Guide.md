@@ -14,7 +14,7 @@ works the same or only affects edge cases.
 
 | | v1 | v2 |
 | --- | --- | --- |
-| PHP | `>=7.4` | `^8.2` (tested on 8.2 – 8.5) |
+| PHP | `>=7.4` | `^8.2` (`^8.0` in 2.0.0; tested on 8.2 – 8.5) |
 | `initphp/parameterbag` | `^1.0` | `^2.0` |
 | `ext-json`, `ext-hash` | not strictly required | required (bundled with default PHP builds) |
 

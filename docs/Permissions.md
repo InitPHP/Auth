@@ -120,7 +120,7 @@ $perm->doSomething();
 // BadMethodCallException: Method InitPHP\Auth\Permission::doSomething() does not exist.
 ```
 
-The same happens for an empty-prefix call:
+An empty-prefix call does not throw; it returns `false`:
 
 ```php
 $perm->is_();   // false (the suffix is empty, no permission to check)
