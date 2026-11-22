@@ -25,9 +25,7 @@ final class NullAdapter extends AbstractAdapter
      *
      * @phpstan-ignore-next-line constructor.unusedParameter
      */
-    public function __construct(string $name = '', array $options = [])
-    {
-    }
+    public function __construct(string $name = '', array $options = []) {}
 
     public function get(string $key, $default = null)
     {
