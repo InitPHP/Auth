@@ -72,7 +72,7 @@ class CookieAdapter extends AbstractAdapter
         if (!isset($options['salt']) || !\is_string($options['salt']) || \strlen($options['salt']) < self::MIN_SALT_LENGTH) {
             throw new \InvalidArgumentException(\sprintf(
                 'A "salt" of at least %d bytes must be supplied. Generate one with bin2hex(random_bytes(32)).',
-                self::MIN_SALT_LENGTH
+                self::MIN_SALT_LENGTH,
             ));
         }
         $this->salt = $options['salt'];

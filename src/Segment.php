@@ -163,14 +163,14 @@ class Segment implements AdapterInterface
                         'Unknown adapter constant: %d. Expected ADAPTER_SESSION (%d) or ADAPTER_COOKIE (%d).',
                         $adapter,
                         self::ADAPTER_SESSION,
-                        self::ADAPTER_COOKIE
+                        self::ADAPTER_COOKIE,
                     ));
             }
         }
 
         if (!\is_string($adapter)) {
             throw new InvalidArgumentException(
-                '$adapter must be one of the ADAPTER_* constants or a class name that extends ' . AbstractAdapter::class . '.'
+                '$adapter must be one of the ADAPTER_* constants or a class name that extends ' . AbstractAdapter::class . '.',
             );
         }
 
@@ -183,7 +183,7 @@ class Segment implements AdapterInterface
             throw new InvalidArgumentException(\sprintf(
                 'Adapter class "%s" must extend %s.',
                 $adapter,
-                AbstractAdapter::class
+                AbstractAdapter::class,
             ));
         }
 

@@ -141,7 +141,7 @@ final class SegmentTest extends TestCase
                 ['method' => 'set', 'args' => ['a', 1]],
                 ['method' => 'set', 'args' => ['b', 2]],
             ],
-            $adapter->calls
+            $adapter->calls,
         );
     }
 
@@ -161,7 +161,7 @@ final class SegmentTest extends TestCase
                 ['method' => 'remove', 'args' => ['a', 'b']],
                 ['method' => 'destroy', 'args' => []],
             ],
-            $adapter->calls
+            $adapter->calls,
         );
     }
 

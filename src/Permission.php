@@ -68,7 +68,7 @@ class Permission
         throw new BadMethodCallException(\sprintf(
             'Method %s::%s() does not exist.',
             static::class,
-            $name
+            $name,
         ));
     }
 
