@@ -261,7 +261,10 @@ $adapter = $segment->adapter();
 
 $segment->set('user_id', 42);
 
-self::assertSame([['method' => 'set', 'args' => ['user_id', 42]]], $adapter->calls);
+$expected = [
+    ['method' => 'set', 'args' => ['user_id', 42]],
+];
+self::assertSame($expected, $adapter->calls);
 ```
 
 ## Picking the right test double
