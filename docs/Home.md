@@ -72,7 +72,7 @@ if ($perm->is('editor')) {
 
 - **License**: MIT
 - **Minimum PHP**: 8.2 (tested through 8.5)
-- **Runtime dependencies**: [`initphp/parameterbag`](https://github.com/InitPHP/ParameterBag) `^2.0`
+- **Runtime dependencies**: [`initphp/parameterbag`](https://github.com/InitPHP/ParameterBag) `^3.0`
 - **PHP extensions**: `ext-json`, `ext-hash` (bundled with default PHP builds)
 - **Packagist**: [`initphp/auth`](https://packagist.org/packages/initphp/auth)
 - **Source**: [github.com/InitPHP/Auth](https://github.com/InitPHP/Auth)

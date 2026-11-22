@@ -6,7 +6,7 @@
 | --- | --- |
 | PHP | `^8.2` (tested through 8.5) |
 | Extensions | `ext-json`, `ext-hash` (bundled with default PHP builds) |
-| Runtime dependencies | [`initphp/parameterbag`](https://github.com/InitPHP/ParameterBag) `^2.0` |
+| Runtime dependencies | [`initphp/parameterbag`](https://github.com/InitPHP/ParameterBag) `^3.0` |
 
 Development dependencies (PHPUnit, PHPStan, PHP-CS-Fixer) live under
 `require-dev` and are not installed when you depend on
