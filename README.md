@@ -176,17 +176,23 @@ CI runs the matrix across PHP 8.2, 8.3, 8.4, and 8.5.
 
 ## Documentation
 
-- [docs/getting-started.md](docs/getting-started.md) — five-minute tour
-- [docs/permissions.md](docs/permissions.md) — `Permission` recipes
-- [docs/adapters/session.md](docs/adapters/session.md) — `SessionAdapter`
-- [docs/adapters/cookie.md](docs/adapters/cookie.md) — `CookieAdapter`,
+- [docs/Quick-Start.md](docs/Quick-Start.md) — five-minute tour
+- [docs/Permissions.md](docs/Permissions.md) — `Permission` recipes
+- [docs/Session-Adapter.md](docs/Session-Adapter.md) — `SessionAdapter`
+- [docs/Cookie-Adapter.md](docs/Cookie-Adapter.md) — `CookieAdapter`,
   salt generation, SameSite/Secure guidance
-- [docs/adapters/custom.md](docs/adapters/custom.md) — building your own
+- [docs/Custom-Adapters.md](docs/Custom-Adapters.md) — building your own
   adapter (with a safe PDO-backed example)
-- [docs/adapters/null.md](docs/adapters/null.md) — `NullAdapter` and when
+- [docs/Null-Adapter.md](docs/Null-Adapter.md) — `NullAdapter` and when
   to use it
-- [docs/upgrading-from-v1.md](docs/upgrading-from-v1.md) — v1 → v2
+- [docs/Security.md](docs/Security.md) — threat model and hardening notes
+- [docs/Testing.md](docs/Testing.md) — testing code that uses adapters
+- [docs/Recipes.md](docs/Recipes.md) — HTTP Basic Auth, CSRF tokens, remember-me, multi-segment
+- [docs/API-Reference.md](docs/API-Reference.md) — every public type and method
+- [docs/Migration-Guide.md](docs/Migration-Guide.md) — v1 → v2
   migration notes
+
+The same pages are published as the [wiki](https://github.com/InitPHP/Auth/wiki).
 
 ## Upgrading from v1
 
@@ -195,7 +201,7 @@ format (old cookies become unreadable and are rolled), case-folding moved
 into the `Permission` constructor, a stricter cookie default profile,
 `NullAdapter::has()` returning `false` instead of `true`, and a clean
 adapter interface that no longer enforces a constructor signature. See
-[docs/upgrading-from-v1.md](docs/upgrading-from-v1.md).
+[docs/Migration-Guide.md](docs/Migration-Guide.md).
 
 ## Contributing & Security
 

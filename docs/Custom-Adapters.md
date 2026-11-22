@@ -1,15 +1,10 @@
-# Custom adapters
+# Custom Adapters
 
-Anything that implements `InitPHP\Auth\AdapterInterface` can sit behind
-a `Segment`. Extending `InitPHP\Auth\AbstractAdapter` is the quickest
-path — it ships a sensible default `collective()` that iterates `set()`,
-so you only have to implement the operations that matter.
-
-## Goal
-
-Back auth state with a real data store (a database, Redis, JWT, your
-favourite key/value service) while still benefiting from the
-`Segment` facade and the `AdapterInterface` contract.
+Anything that implements [`AdapterInterface`](Adapter-Interface.md) can
+sit behind a [`Segment`](Segment.md). Extending
+[`AbstractAdapter`](Adapter-Interface.md#abstractadapter) is the quickest
+path — it ships a sensible default `collective()` that iterates
+`set()`, so you only have to implement the operations that matter.
 
 ## A minimal working adapter
 
@@ -61,11 +56,12 @@ final class ArrayAdapter extends AbstractAdapter
 ```
 
 `collective()` is not implemented — the parent class provides a default
-that calls `set()` per pair. Override it if your backing store can
-commit atomically (the way `CookieAdapter` overrides it to emit one
-`Set-Cookie` header for a bulk write).
+that calls `set()` per pair. Override it when your backing store can
+commit atomically and the per-key write would be wasteful (the cookie
+adapter does this so a bulk write emits one `Set-Cookie` header
+instead of N).
 
-## Using it through `Segment`
+## Wiring it through `Segment`
 
 ```php
 use InitPHP\Auth\Segment;
@@ -73,12 +69,12 @@ use InitPHP\Auth\Segment;
 $auth = Segment::custom('auth', App\Auth\ArrayAdapter::class);
 
 $auth->set('user_id', 42);
-$auth->get('user_id');  // 42
+$auth->get('user_id');   // 42
 ```
 
 The custom factory requires the class to extend `AbstractAdapter`.
 Passing a class that does not raises `InvalidArgumentException` — see
-[Exceptions](../README.md#exceptions).
+[Exceptions](Exceptions.md).
 
 ## Constructor signature
 
@@ -88,7 +84,7 @@ handle, a Redis client. Sign your constructor however the store needs.
 
 The `Segment::custom()` factory will, however, invoke your constructor
 as `new YourClass($name, $options)`, so the convention if you want it
-to be `Segment`-compatible is to accept those two arguments.
+to be `Segment`-compatible is to accept those two arguments:
 
 ```php
 final class DatabaseAdapter extends AbstractAdapter
@@ -105,7 +101,7 @@ final class DatabaseAdapter extends AbstractAdapter
             throw new \InvalidArgumentException('A PDO handle is required.');
         }
         $this->segment = $name;
-        $this->pdo = $options['pdo'];
+        $this->pdo     = $options['pdo'];
     }
 
     // ... get/set/has/remove/destroy ...
@@ -116,12 +112,22 @@ $auth = Segment::custom('auth', App\Auth\DatabaseAdapter::class, [
 ]);
 ```
 
+If your adapter needs a constructor signature that does not fit
+`(string $name, array $options)`, build it by hand:
+
+```php
+$adapter = new App\Auth\WeirdAdapter($somethingElse, $anotherDependency);
+
+// Then consume $adapter directly — Segment does not currently accept a
+// pre-built adapter through its public surface.
+```
+
 ## A safer PDO-backed example
 
 The v1 README shipped a `BasicAuthAdapter` sample that concatenated
-user input into SQL strings. That example is replaced here with a
-prepared-statement version that uses `password_verify()` and never
-trusts the request directly.
+user input into SQL strings and used `md5()` to compare passwords.
+This is the rewritten version: prepared statements, `password_verify()`,
+and a column-name whitelist.
 
 ```php
 <?php
@@ -143,7 +149,7 @@ use PDO;
  *     id: int,
  *     username: string,
  *     password_hash: string,
- *     role?: string|null
+ *     role?: string|null,
  * }
  */
 final class BasicAuthAdapter extends AbstractAdapter
@@ -176,8 +182,8 @@ final class BasicAuthAdapter extends AbstractAdapter
     {
         $this->guardWritableColumn($key);
 
+        // Column name is whitelisted above; the value is bound.
         $stmt = $this->pdo->prepare(
-            // Column name is whitelisted above; the value is bound.
             \sprintf('UPDATE users SET %s = :value WHERE id = :id', $key)
         );
         $stmt->execute([
@@ -250,25 +256,86 @@ final class BasicAuthAdapter extends AbstractAdapter
 }
 ```
 
-Key differences from the v1 example:
+### Key differences from the v1 example
 
-- **No string concatenation of values.** Every value is bound through a
-  prepared statement.
-- **No string concatenation of column names either.** Column names that
-  PDO cannot bind are whitelisted in `ALLOWED_COLUMNS`; anything else
-  raises an exception before the SQL is built.
-- **`password_verify()` instead of `md5()`.** Stored hashes should come
-  from `password_hash($plain, PASSWORD_DEFAULT)` at registration time.
-- **Strict PDO mode.** `ERRMODE_EXCEPTION` + `EMULATE_PREPARES=false`
-  means PDO will refuse to silently degrade.
+| Concern | v1 README | This page |
+| --- | --- | --- |
+| User input in SQL | Concatenated | Bound via prepared statement |
+| Column names in SQL | Concatenated | Whitelisted in `ALLOWED_COLUMNS` |
+| Password comparison | `md5()` | `password_verify()` against `password_hash()` output |
+| PDO error mode | Default (silent) | `ERRMODE_EXCEPTION` + `EMULATE_PREPARES=false` |
+| Fetch mode | Default | `FETCH_ASSOC` (typed array shape) |
+
+The full request-lifecycle example (with `Permission` gating) lives in
+the [Basic Auth Recipe](Recipe-Basic-Auth.md).
+
+## Overriding `collective()`
+
+The default implementation iterates `set()`. Override when you can do
+better:
+
+```php
+public function collective(array $data): AdapterInterface
+{
+    $this->pdo->beginTransaction();
+    try {
+        foreach ($data as $key => $value) {
+            $this->set((string) $key, $value);
+        }
+        $this->pdo->commit();
+    } catch (\Throwable $e) {
+        $this->pdo->rollBack();
+        throw $e;
+    }
+    return $this;
+}
+```
+
+(The above is illustrative; production code would also coalesce the
+per-row `UPDATE` statements into a single batched query.)
+
+## Validation: fail fast in the constructor
+
+Surface bad configuration immediately, before any I/O:
+
+```php
+public function __construct(string $name, array $options)
+{
+    if (!isset($options['pdo']) || !$options['pdo'] instanceof \PDO) {
+        throw new \InvalidArgumentException('A PDO handle is required.');
+    }
+    // ...
+}
+```
+
+This matches the pattern `CookieAdapter` uses for the `salt` option,
+and it keeps confusing "method called on null" errors out of your
+production logs.
 
 ## Common mistakes
 
 - **Implementing the interface directly without `AbstractAdapter`.**
   You can — but you lose the default `collective()` and have to
   implement six methods instead of five.
-- **Throwing from `destroy()`.** Callers expect `destroy()` to be
-  idempotent. Return `true` once the store is clean and let subsequent
-  reads fail with `RuntimeException` via your `getStore()` guard.
+- **Throwing from `destroy()` on an already-destroyed store.**
+  `destroy()` should be idempotent. Return `false` once the store is
+  clean and let subsequent reads/writes hit the existing guard that
+  throws.
 - **Forwarding raw user input as SQL column names.** Always whitelist.
   Prepared statements bind values, not identifiers.
+- **Hashing passwords with `md5()`/`sha1()`.** Use `password_hash()`
+  at registration time and `password_verify()` at login. The cost
+  parameter automatically tracks PHP defaults.
+- **Storing the PDO connection on a long-lived adapter instance.** If
+  the adapter outlives the request (queue worker, daemon), the
+  underlying TCP connection will eventually be dropped by the server.
+  Reconstruct the adapter per job.
+
+## Where to go next
+
+- [Adapter Interface](Adapter-Interface.md) — the contract you implement.
+- [Segment](Segment.md) — how the facade hands work off to your adapter.
+- [Recipe → HTTP Basic Auth](Recipe-Basic-Auth.md) — full request
+  lifecycle around `BasicAuthAdapter`.
+- [Testing](Testing.md) — how to test a custom adapter without a real
+  database.
