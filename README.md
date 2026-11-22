@@ -32,7 +32,7 @@ permission set.
 
 - PHP 8.2 or later (tested on 8.2 – 8.5)
 - ext-json, ext-hash (both bundled with default PHP builds)
-- [`initphp/parameterbag`](https://github.com/InitPHP/ParameterBag) `^2.0`
+- [`initphp/parameterbag`](https://github.com/InitPHP/ParameterBag) `^3.0`
 
 ## Installation
 

@@ -20,7 +20,7 @@ works the same or only affects edge cases.
 
 ```bash
 composer require initphp/auth:^3.0
-composer require initphp/parameterbag:^2.0    # if you depend on it directly
+composer require initphp/parameterbag:^3.0    # if you depend on it directly
 ```
 
 ## `Permission` — case-folding moved into the constructor
@@ -286,7 +286,7 @@ The test suite covers `Permission`, `SessionAdapter`, `CookieAdapter`,
 
 - [ ] Bump `php` to `^8.2` in your project's `composer.json`.
 - [ ] Bump `initphp/auth` to `^3.0` (`^2.0` if you must stay on PHP 8.0 or 8.1).
-- [ ] Bump `initphp/parameterbag` to `^2.0` if you depend on it directly.
+- [ ] Bump `initphp/parameterbag` to `^3.0` if you depend on it directly.
 - [ ] Generate a fresh cookie salt (`bin2hex(random_bytes(32))`) and
       store it in your environment.
 - [ ] Verify your cookie `secure` / `samesite` defaults still match
