@@ -14,7 +14,7 @@ works the same or only affects edge cases.
 
 | | v1 | v2 |
 | --- | --- | --- |
-| PHP | `>=7.4` | `^8.0` in 2.x; `^8.2` from 3.0.0 (tested on 8.2 – 8.5) |
+| PHP | `>=7.4` | `^8.0` in 2.x; `^8.2` from 3.0.0 (tested on 8.2 – 8.6) |
 | `initphp/parameterbag` | `^1.0` | `^2.0` |
 | `ext-json`, `ext-hash` | not strictly required | required (bundled with default PHP builds) |
 
@@ -280,7 +280,7 @@ composer cs:fix       # PHP-CS-Fixer apply
 ```
 
 The test suite covers `Permission`, `SessionAdapter`, `CookieAdapter`,
-`Segment`, and `NullAdapter`. CI runs on PHP 8.2 through 8.5.
+`Segment`, and `NullAdapter`. CI runs on PHP 8.2 through 8.6.
 
 ## Migration checklist
 

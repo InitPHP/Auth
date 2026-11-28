@@ -4,7 +4,7 @@
 
 | | |
 | --- | --- |
-| PHP | `^8.2` (tested through 8.5) |
+| PHP | `^8.2` (tested through 8.6) |
 | Extensions | `ext-json`, `ext-hash` (bundled with default PHP builds) |
 | Runtime dependencies | [`initphp/parameterbag`](https://github.com/InitPHP/ParameterBag) `^3.0` |
 
@@ -62,6 +62,7 @@ Every PR runs the test matrix against:
 - PHP 8.3
 - PHP 8.4
 - PHP 8.5
+- PHP 8.6
 
 The static analysis (PHPStan level 8) and code-style (PHP-CS-Fixer) jobs
 run against the highest supported version.

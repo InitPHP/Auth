@@ -30,7 +30,7 @@ permission set.
 
 ## Requirements
 
-- PHP 8.2 or later (tested on 8.2 – 8.5)
+- PHP 8.2 or later (tested on 8.2 – 8.6)
 - ext-json, ext-hash (both bundled with default PHP builds)
 - [`initphp/parameterbag`](https://github.com/InitPHP/ParameterBag) `^3.0`
 
@@ -172,7 +172,7 @@ composer cs:check     # PHP-CS-Fixer dry-run
 composer cs:fix       # PHP-CS-Fixer apply
 ```
 
-CI runs the matrix across PHP 8.2, 8.3, 8.4, and 8.5.
+CI runs the matrix across PHP 8.2, 8.3, 8.4, 8.5, and 8.6.
 
 ## Documentation
 
